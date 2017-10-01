@@ -116,6 +116,22 @@ export class AuthenticationService {
             }
         });
     }
+
+    startSigninMainWindow() {
+        this.mgr.signinRedirect({ data: 'some data' }).then(function () {
+        console.log('signinRedirect done');
+        }).catch(function (err) {
+        console.log(err);
+        });
+    }
+    
+    endSigninMainWindow() {
+        this.mgr.signinRedirectCallback().then(function (user) {
+        console.log('signed in', user);
+        }).catch(function (err) {
+        console.log(err);
+        });
+    }
 }
 ```
 
