@@ -1,0 +1,91 @@
+---
+layout: post
+title: Using Teamcity & Octopus To Build & Deploy an Angular 4 App
+tags:
+- angular
+- angular-cli
+- teamcity
+- octopus
+- configuration
+---
+
+Last week I was configurating an end-to-end CI/CD pipeline using *Teamcity*, *Angular/Cli* and *Octopus*. Some of the pieces of this puzzle was not straight forward. So, in this post I am going to give you an *step-by-step* guide as to how I achieved it. 
+
+## What Are We Going To Do
+
+There are a couple of things we would like to have at the end of this process.
+
+- An App Configuration that can be used to local development as well as changeable for target deployment environment - This will contain the configurations like the *URI of the API to call* which will be different per DEV, TEST, STAGING & PROD environments.
+- A Teamcity build that compiles, builds and packs the App and pushes to Octopus
+- Octopus configured to transform the App Configuration to the target deployment environment
+
+
+## Preparing App Configuration for Transformations Using Octopus
+
+Every App needs to have a configuration file which contains the environment specific configurations like the URI of the API to call. 
+
+### App Config for Local Development
+
+*src/assets/js/config.js*
+
+```javascript
+window.config = {
+    baseUrl: 'http://localhost:4200/api',
+};
+```
+
+### Adding a Configuration Service
+
+*src/app/common/config.service.ts*
+
+```typescript
+import { Injectable, Inject } from '@angular/core';
+
+/**
+ * Uses window.config to grab the config.
+ * Provides the config values to the services.
+ */
+@Injectable()
+export class ConfigService {
+    private config: any;
+
+    // AOT Compiler errors if 'Window' is injected here.
+    // Will probably be fixed in the angular future.
+    constructor() {
+        const window = this.getWindow();
+
+        if (window['config']) {
+            this.config = window['config'];
+            console.log('Configuration loaded ', this.config);
+        } else {
+            console.warn('No configuration found in window object');
+        }
+    }
+
+    getWindow(): any {
+        return window;
+    }
+
+    get baseUrl() {
+        return this.config.baseUrl;
+    }
+}
+
+```
+
+
+### App Config Template to be Transformed by Octopus
+
+### Include a Nuget Config (.nuspec) File
+
+# Build Script for Teamcity to Use Angular/Cli
+
+# Configuring Teamcity Build
+
+## Build Setup
+
+## Generate Nuget Package
+
+# Configuring Octopus
+
+## Configuration Transformations
