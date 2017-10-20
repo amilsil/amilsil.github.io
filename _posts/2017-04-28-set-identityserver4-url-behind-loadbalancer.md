@@ -14,6 +14,7 @@ One of the problems of having an Identity Server behind a Load Balancer is to ge
 When Identity Server host is bootstrapped as below, it runs on *localhost* and all Urls in the discovery endpoint has "localhost" in them. 
 
 `Program.cs`
+
 ```csharp
 Console.Title = "IdentityServer";
 
@@ -31,6 +32,7 @@ host.Run();
 Discovery Endpoint output :
 
 `http://localhost:5000/.well-known/openid-configuration`
+
 ```json 
 {
     "issuer": "http://localhost:5000",
@@ -57,6 +59,7 @@ We cannot configure `https://identity.example.com` in the VM, because the VM, st
 We can write a simple custom middleware to feed the correct Url to the discovery endpoint. 
 
 `Config/PublicFacingUrlMiddleware.cs`
+
 ```csharp
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -96,6 +99,7 @@ This middleware sets one important property in the Identity Server. The `Origin`
 The last change is to use the new middleware in the IdentityServer pipeline in `Startup.cs`.
 
 `Startup.cs` (where identityserver is added to the pipeline)
+
 ```csharp
 //app.UseIdentityServer(); This was replaced by the following 4 lines.
 app.UseMiddleware<PublicFacingUrlMiddleware>(Configuration[IdentityServerPublicFacingUri]);
@@ -108,6 +112,7 @@ Now the `PublicFacingUrlMiddleware` is in the pipeline.
 You can add a configuration in `appSettings.json` to configure it to what you want. In my case it is *https://identity.example.com*.
 
 `appsettings.json`
+
 ```json
 {
   "IdentityServerPublicFacingUri":  "https://identity.example.com",
@@ -126,6 +131,7 @@ You can add a configuration in `appSettings.json` to configure it to what you wa
 Load the Disovery Endpoint now and you will have it as follows.
 
 `http://localhost:5000/.well-known/openid-configuration`
+
 ```json
 {
     "issuer": "https://identity.example.com",
