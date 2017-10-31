@@ -13,13 +13,25 @@ If you are using Identity Server 4 for authenticating an *angular 2* or higher b
 
 Identity Server comes with a javascript client *oidc-client.js* that can do the work for you. However, since it's not targeted for angular clients, there are a few things we have to do to make it work on angular.
 
+UPDATED: 31, October 2017
+
 Steps
+
 * Write an Authentication Service using Oidc-Client.js.
 * Add a `signin-callback.html` (as the callback after successful sign-in, to grab the *access token*).
 * Add a `silent-renew-callback.html` (to be loaded in the hidden iframe, to refresh the *access token*).
 * Add a AuthenticationCheck to secure the Routes.
 
-### Main Pieces of the Flow
+### Completed Server & Client
+
+To save your time in implementing the whole process, I have commited the **fully working server and client** at,
+
+> [https://github.com/amilsil/angularimplicit](https://github.com/amilsil/angularimplicit)
+
+
+## Main Pieces of the Flow
+
+### Piece 1: Authentication Service
 `authentication.service.ts`
 
 The most important bit. Initializes the *oidc-client.js* with the following settings. The few methods in the *UserManager* will hereafter work with those settings. Like *StartSigninMainWindow()* which will redirect the browser to the identity server for authenticating the user.
@@ -135,6 +147,30 @@ export class AuthenticationService {
 }
 ```
 
+### Piece 2: Routes for Callbacks
+
+To add the callbacks html to the angular application, we also need to configure `.angular-cli.json` file to allow their routes.
+
+`.angular-cli.json` : add the following two lines for the new pages we are going to add.
+
+```json
+  "apps": [
+    {
+      "root": "src",
+      "outDir": "dist",
+      "assets": [
+        "assets",
+        "favicon.ico",
+        { "glob": "signin-callback.html", "input": "./", "output": "./" },
+        { "glob": "silent-renew.html", "input": "./", "output": "./" }
+      ]
+    }
+  ]
+```
+
+### Piece 3: Callback html pages
+Next, we will add the callback pages themselves.
+
 `signin-callback.html`
 
 When the user is redirected to this page with the new token, it should be stored in the *local storage*. This is the only functionality of this page. Done with `UserManager().signinRedirectCallback()`. If this was successful the user is signed in. So we redirect the user to the *dashboard*. 
@@ -194,6 +230,7 @@ Looks almost identical to the `signin-redirect-callback.html`, except this one c
 
 That's basically about it on getting the *authentication flow* working. One additional thing that you might want to do is to guard the securable pages only to be available to a signed in user. This has more to do with angular routing. 
 
+### Piece 4: Lock down angular routing by an auth guard
 
 `authentication-check.ts`
 
@@ -235,7 +272,7 @@ export class AuthenticationCheck implements CanActivate {
 }
 ```
 
-### Changes to Routes
+### Piece 5: Changes to Routes
 
 The last thing in the puzzle is to add the *Check* to the routing. This makes sure those *Securable* components only have authenticated access, by using the `AuthenticationCheck` we wrote before.
 
