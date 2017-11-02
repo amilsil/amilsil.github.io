@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Using Teamcity & Octopus To Build & Deploy an Angular 4 App
+title: Using Teamcity, Octopus To Build, Configure & Deploy an Angular 4 App
 tags:
 - angular
 - angular-cli
@@ -100,7 +100,7 @@ Replacing our temporary `assets/js/config.js` with the new **template** file is 
 
 Here is a *nuspec* file to do just that while packing our build files.
 
-`/sampleapp.nuspec`
+`/sample-app.nuspec`
 
 ```xml
 <?xml version="1.0"?>
@@ -129,7 +129,7 @@ Here is a *nuspec* file to do just that while packing our build files.
 </package>
 ```
 
-# Build Script for Teamcity to Use Angular/Cli
+## Build Script for Teamcity to Use Angular/Cli
 
 Build configuration on teamcity is pretty straight forward. Only tricky part is adding a new build target `build-prod` as below. This target will use **angular-cli** to build the app.
 
@@ -146,22 +146,48 @@ Build configuration on teamcity is pretty straight forward. Only tricky part is 
 }
 ```
 
-# Configuring Teamcity Build
+## Configuring Teamcity Build
 
 Teamcity configuration will look as below,
-[]()
 
+First three steps are pretty straight forward.
+We gotta,
 
-## Build Setup
+- Install Npm dependencies
+- Build (notice I call a command line `npm run build-prod` there. I am executing the target created above)
+- Run Tests (if you have any)
 
-## Generate Nuget Package
+![Teamcity Build Steps]({{ site.baseurl }}/images/2017-11-02/teamcitybuild.png "Teamcity Build Steps")
 
-# Configuring Octopus
+### Generate Nuget Package
+
+Step 4 is packaging the app to a nuget. 
+We use a **Nuget Pack** Runner here with our **sample-app.nuspec** file - this will pack our app along with that template file we created.
+
+Step 5 is pushing that to a package repository - ready to be picked by octopus. You can use the package repository of octopus server itself.
+
+![Nuget Package]({{ site.baseurl }}/images/2017-11-02/nugetpack.png "Nuget Package")
+
+## Configuring Octopus
 
 My octopus deployment process has only one step. It deploys the content of the nuget pack to a linux box. I have installed **Calamari** on the box and added that as a target in octopus. Let me know if you have trouble getting that done. To the simplicity of this post, let's focus on the deployment process.
 
 There are two additional steps to do here. **Substitute variables in files** by adding our `./assets/js/config.js` (that now contains the template with placeholders). 
 
-Add relevant values for our **baseUrl** per each environment.
+![Octopus Process]({{ site.baseurl }}/images/2017-11-02/octopusprocess.png "Octopus Process")
+
 
 ## Configuration Transformations
+
+Add relevant values for our **baseUrl** per each environment.
+The sample here has my **baseUrl** replaced with that of PROD environment. We can add other configs here for any other environments we have.
+
+![Octopus variables]({{ site.baseurl }}/images/2017-11-02/octopusvariables.png "Octopus variables")
+
+## Conclusion
+
+So that's it. There we have a Build Deploy Pipleline for our Angular 4 app with Configuration Transformations also.
+
+Let me know if you hit any walls.
+
+Cheers!
