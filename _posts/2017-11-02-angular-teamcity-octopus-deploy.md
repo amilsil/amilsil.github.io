@@ -9,7 +9,7 @@ tags:
 - configuration
 ---
 
-Last week I was configurating an end-to-end CI/CD pipeline using *Teamcity*, *Angular/Cli* and *Octopus*. Some of the pieces of this puzzle was not straight forward. So, in this post I am going to give you an *step-by-step* guide as to how I achieved it. 
+Last week I was configuring an end-to-end CI/CD pipeline using *Teamcity*, *Angular/Cli* and *Octopus*. Some of the pieces of this puzzle was not straight forward. So, in this post I am going to give you an *step-by-step* guide as to how I achieved it. 
 
 ## What Are We Going To Do
 
